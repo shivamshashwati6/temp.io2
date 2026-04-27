@@ -62,11 +62,11 @@ class AIQuery(BaseModel):
     lat: Optional[float] = None
     lon: Optional[float] = None
 
-@app.get("/api/health")
+@app.get("/health")
 def health():
     return {"ok": True, "time": datetime.utcnow().isoformat()}
 
-@app.get("/api/weather/current")
+@app.get("/weather/current")
 async def current_weather(lat: float, lon: float):
     """Return normalized current weather for a given lat/lon using Open-Meteo."""
     try:
@@ -98,7 +98,7 @@ async def current_weather(lat: float, lon: float):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/weather/hourly")
+@app.get("/weather/hourly")
 async def hourly_forecast(lat: float, lon: float, hours: int = 24):
     """Return hourly forecast for the next N hours."""
     try:
@@ -139,7 +139,7 @@ async def hourly_forecast(lat: float, lon: float, hours: int = 24):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/api/weather/by-region")
+@app.get("/weather/by-region")
 async def weather_by_region(state: str, district: Optional[str] = None):
     """Geocode a state+district in India and return current weather.
     Uses multiple search strategies and fallbacks to ensure location is found.
@@ -287,7 +287,7 @@ async def weather_by_region(state: str, district: Optional[str] = None):
         )
 
 
-@app.get("/api/geocode/suggest")
+@app.get("/geocode/suggest")
 async def geocode_suggest(state: str, q: str):
     """Return geocoding suggestions for a query constrained to India and optionally filtered by admin1 (state).
     Example: /api/geocode/suggest?state=Karnataka&q=Benga
@@ -324,7 +324,7 @@ async def geocode_suggest(state: str, q: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/ai/query")
+@app.post("/ai/query")
 async def ai_query(req: AIQuery):
     """Smart AI weather assistant that handles any weather-related question naturally."""
     q = req.query.strip().lower()

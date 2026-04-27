@@ -13,17 +13,17 @@ def test_health():
     print("\n[TEST 1] Health Check")
     print("-" * 50)
     try:
-        response = httpx.get(f"{BASE_URL}/api/health", timeout=5.0)
+        response = httpx.get(f"{BASE_URL}/health", timeout=5.0)
         if response.status_code == 200:
             data = response.json()
-            print(f"✓ Status: {response.status_code}")
-            print(f"✓ Response: {data}")
+            print(f"  [PASS] Status: {response.status_code}")
+            print(f"  [PASS] Response: {data}")
             return True
         else:
-            print(f"✗ Failed with status: {response.status_code}")
+            print(f"  [FAIL] Failed with status: {response.status_code}")
             return False
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"  [FAIL] Error: {e}")
         return False
 
 def test_weather_by_region():
@@ -32,23 +32,23 @@ def test_weather_by_region():
     print("-" * 50)
     try:
         params = {"state": "Delhi", "district": "New Delhi"}
-        response = httpx.get(f"{BASE_URL}/api/weather/by-region", params=params, timeout=10.0)
+        response = httpx.get(f"{BASE_URL}/weather/by-region", params=params, timeout=10.0)
         if response.status_code == 200:
             data = response.json()
-            print(f"✓ Status: {response.status_code}")
-            print(f"✓ Location: {data.get('location')}")
-            print(f"✓ Temperature: {data.get('temperature_c')}°C")
-            print(f"✓ Humidity: {data.get('humidity')}%")
-            print(f"✓ Feels Like: {data.get('feels_like_c')}°C")
-            print(f"✓ Wind Speed: {data.get('windspeed_kph')} km/h")
-            print(f"✓ Weather Code: {data.get('weathercode')}")
+            print(f"  [PASS] Status: {response.status_code}")
+            print(f"  [PASS] Location: {data.get('location')}")
+            print(f"  [PASS] Temperature: {data.get('temperature_c')}°C")
+            print(f"  [PASS] Humidity: {data.get('humidity')}%")
+            print(f"  [PASS] Feels Like: {data.get('feels_like_c')}°C")
+            print(f"  [PASS] Wind Speed: {data.get('windspeed_kph')} km/h")
+            print(f"  [PASS] Weather Code: {data.get('weathercode')}")
             return True
         else:
-            print(f"✗ Failed with status: {response.status_code}")
+            print(f"  [FAIL] Failed with status: {response.status_code}")
             print(f"  Response: {response.text}")
             return False
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"  [FAIL] Error: {e}")
         return False
 
 def test_weather_current():
@@ -57,20 +57,20 @@ def test_weather_current():
     print("-" * 50)
     try:
         params = {"lat": 19.0760, "lon": 72.8777}
-        response = httpx.get(f"{BASE_URL}/api/weather/current", params=params, timeout=10.0)
+        response = httpx.get(f"{BASE_URL}/weather/current", params=params, timeout=10.0)
         if response.status_code == 200:
             data = response.json()
-            print(f"✓ Status: {response.status_code}")
-            print(f"✓ Temperature: {data.get('temperature_c')}°C")
-            print(f"✓ Humidity: {data.get('humidity')}%")
-            print(f"✓ Precipitation: {data.get('precipitation')} mm")
-            print(f"✓ Wind Speed: {data.get('windspeed_kph')} km/h")
+            print(f"  [PASS] Status: {response.status_code}")
+            print(f"  [PASS] Temperature: {data.get('temperature_c')}°C")
+            print(f"  [PASS] Humidity: {data.get('humidity')}%")
+            print(f"  [PASS] Precipitation: {data.get('precipitation')} mm")
+            print(f"  [PASS] Wind Speed: {data.get('windspeed_kph')} km/h")
             return True
         else:
-            print(f"✗ Failed with status: {response.status_code}")
+            print(f"  [FAIL] Failed with status: {response.status_code}")
             return False
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"  [FAIL] Error: {e}")
         return False
 
 def test_hourly_forecast():
@@ -79,23 +79,23 @@ def test_hourly_forecast():
     print("-" * 50)
     try:
         params = {"lat": 12.9716, "lon": 77.5946, "hours": 12}
-        response = httpx.get(f"{BASE_URL}/api/weather/hourly", params=params, timeout=10.0)
+        response = httpx.get(f"{BASE_URL}/weather/hourly", params=params, timeout=10.0)
         if response.status_code == 200:
             data = response.json()
             forecast = data.get('forecast', [])
-            print(f"✓ Status: {response.status_code}")
-            print(f"✓ Forecast hours received: {len(forecast)}")
+            print(f"  [PASS] Status: {response.status_code}")
+            print(f"  [PASS] Forecast hours received: {len(forecast)}")
             if forecast:
-                print(f"✓ First hour: {forecast[0].get('time')}")
+                print(f"  [PASS] First hour: {forecast[0].get('time')}")
                 print(f"  - Temperature: {forecast[0].get('temperature_c')}°C")
                 print(f"  - Humidity: {forecast[0].get('humidity')}%")
                 print(f"  - Precipitation Probability: {forecast[0].get('precipitation_probability')}%")
             return True
         else:
-            print(f"✗ Failed with status: {response.status_code}")
+            print(f"  [FAIL] Failed with status: {response.status_code}")
             return False
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"  [FAIL] Error: {e}")
         return False
 
 def test_ai_query():
@@ -108,18 +108,18 @@ def test_ai_query():
             "lat": 28.6139,
             "lon": 77.2090
         }
-        response = httpx.post(f"{BASE_URL}/api/ai/query", json=payload, timeout=15.0)
+        response = httpx.post(f"{BASE_URL}/ai/query", json=payload, timeout=15.0)
         if response.status_code == 200:
             data = response.json()
-            print(f"✓ Status: {response.status_code}")
-            print(f"✓ Mode: {data.get('mode')}")
-            print(f"✓ Answer: {data.get('answer')[:100]}...")
+            print(f"  [PASS] Status: {response.status_code}")
+            print(f"  [PASS] Mode: {data.get('mode')}")
+            print(f"  [PASS] Answer: {data.get('answer')[:100]}...")
             return True
         else:
-            print(f"✗ Failed with status: {response.status_code}")
+            print(f"  [FAIL] Failed with status: {response.status_code}")
             return False
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"  [FAIL] Error: {e}")
         return False
 
 def test_geocode_suggest():
@@ -128,20 +128,20 @@ def test_geocode_suggest():
     print("-" * 50)
     try:
         params = {"state": "Karnataka", "q": "Bang"}
-        response = httpx.get(f"{BASE_URL}/api/geocode/suggest", params=params, timeout=10.0)
+        response = httpx.get(f"{BASE_URL}/geocode/suggest", params=params, timeout=10.0)
         if response.status_code == 200:
             data = response.json()
             suggestions = data.get('suggestions', [])
-            print(f"✓ Status: {response.status_code}")
-            print(f"✓ Suggestions found: {len(suggestions)}")
+            print(f"  [PASS] Status: {response.status_code}")
+            print(f"  [PASS] Suggestions found: {len(suggestions)}")
             for i, sug in enumerate(suggestions[:3], 1):
                 print(f"  {i}. {sug.get('display_name')}")
             return True
         else:
-            print(f"✗ Failed with status: {response.status_code}")
+            print(f"  [FAIL] Failed with status: {response.status_code}")
             return False
     except Exception as e:
-        print(f"✗ Error: {e}")
+        print(f"  [FAIL] Error: {e}")
         return False
 
 def main():
@@ -179,10 +179,10 @@ def main():
     print(f"Failed: {total - passed}/{total}")
     
     if passed == total:
-        print("\n✓ All tests passed! Backend is working correctly.")
+        print("\n[PASS] All tests passed! Backend is working correctly.")
         sys.exit(0)
     else:
-        print("\n✗ Some tests failed. Please check the output above.")
+        print("\n[FAIL] Some tests failed. Please check the output above.")
         sys.exit(1)
 
 if __name__ == "__main__":
