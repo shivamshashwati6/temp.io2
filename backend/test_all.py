@@ -13,7 +13,7 @@ def test_health():
     print("\n[TEST 1] Health Check")
     print("-" * 50)
     try:
-        response = httpx.get(f"{BASE_URL}/health", timeout=5.0)
+        response = httpx.get(f"{BASE_URL}/api/health", timeout=5.0)
         if response.status_code == 200:
             data = response.json()
             print(f"  [PASS] Status: {response.status_code}")
@@ -32,7 +32,7 @@ def test_weather_by_region():
     print("-" * 50)
     try:
         params = {"state": "Delhi", "district": "New Delhi"}
-        response = httpx.get(f"{BASE_URL}/weather/by-region", params=params, timeout=10.0)
+        response = httpx.get(f"{BASE_URL}/api/weather/by-region", params=params, timeout=10.0)
         if response.status_code == 200:
             data = response.json()
             print(f"  [PASS] Status: {response.status_code}")
@@ -57,7 +57,7 @@ def test_weather_current():
     print("-" * 50)
     try:
         params = {"lat": 19.0760, "lon": 72.8777}
-        response = httpx.get(f"{BASE_URL}/weather/current", params=params, timeout=10.0)
+        response = httpx.get(f"{BASE_URL}/api/weather/current", params=params, timeout=10.0)
         if response.status_code == 200:
             data = response.json()
             print(f"  [PASS] Status: {response.status_code}")
@@ -79,7 +79,7 @@ def test_hourly_forecast():
     print("-" * 50)
     try:
         params = {"lat": 12.9716, "lon": 77.5946, "hours": 12}
-        response = httpx.get(f"{BASE_URL}/weather/hourly", params=params, timeout=10.0)
+        response = httpx.get(f"{BASE_URL}/api/weather/hourly", params=params, timeout=10.0)
         if response.status_code == 200:
             data = response.json()
             forecast = data.get('forecast', [])
@@ -108,7 +108,7 @@ def test_ai_query():
             "lat": 28.6139,
             "lon": 77.2090
         }
-        response = httpx.post(f"{BASE_URL}/ai/query", json=payload, timeout=15.0)
+        response = httpx.post(f"{BASE_URL}/api/ai/query", json=payload, timeout=15.0)
         if response.status_code == 200:
             data = response.json()
             print(f"  [PASS] Status: {response.status_code}")
@@ -128,7 +128,7 @@ def test_geocode_suggest():
     print("-" * 50)
     try:
         params = {"state": "Karnataka", "q": "Bang"}
-        response = httpx.get(f"{BASE_URL}/geocode/suggest", params=params, timeout=10.0)
+        response = httpx.get(f"{BASE_URL}/api/geocode/suggest", params=params, timeout=10.0)
         if response.status_code == 200:
             data = response.json()
             suggestions = data.get('suggestions', [])
