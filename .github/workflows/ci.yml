@@ -20,19 +20,19 @@ jobs:
     
     - name: Install dependencies
       run: |
-        cd backend
+        cd api
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
     - name: Run server in background
       run: |
-        cd backend
-        nohup python -m uvicorn main:app --port 8000 &
+        cd api
+        nohup python -m uvicorn index:app --port 8000 &
         sleep 5 # Wait for server to start
     
     - name: Run tests
       run: |
-        cd backend
+        cd api
         python test_all.py
   
   test-frontend:
