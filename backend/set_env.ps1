@@ -1,23 +1,27 @@
 <#
-Create .env in the backend folder with OPENAI_API_KEY.
-Usage: run this script from PowerShell by double-clicking or from the backend folder:
-  cd d:\Projects\backend
-  .\set_env.ps1
+Helper script to quickly set the API key for local development
+Run this from PowerShell: .\set_env.ps1
+Create .env in the backend folder with GOOGLE_API_KEY.
 
 This writes plaintext .env for local development. Do not commit this file to git.
 #>
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-Write-Host "This will create or update '$scriptDir\.env' with your OpenAI API key." -ForegroundColor Yellow
+$envPath = Join-Path $scriptDir ".env"
 
-$key = Read-Host -Prompt "Enter your OpenAI API key (sk-...)" 
+if (Test-Path $envPath) {
+    Write-Host "Found existing .env file at $envPath" -ForegroundColor Cyan
+}
+
+Write-Host "This will create or update '$scriptDir\.env' with your Google Gemini API key." -ForegroundColor Yellow
+
+$key = Read-Host -Prompt "Enter your Google Gemini API key" 
 $key = $key.Trim()
 if ([string]::IsNullOrWhiteSpace($key)) {
     Write-Host "No key entered. Aborting." -ForegroundColor Red
     exit 1
 }
 
-$envPath = Join-Path $scriptDir ".env"
 if (Test-Path $envPath) {
     $choice = Read-Host "'.env' already exists. Overwrite? (y/N)"
     if ($choice.ToLower() -ne 'y') {
@@ -27,6 +31,6 @@ if (Test-Path $envPath) {
 }
 
 # Write the key to .env
-Set-Content -Path $envPath -Value ("OPENAI_API_KEY=" + $key) -Encoding UTF8
-Write-Host "Wrote OPENAI_API_KEY to $envPath" -ForegroundColor Green
+Set-Content -Path $envPath -Value ("GOOGLE_API_KEY=" + $key) -Encoding UTF8
+Write-Host "Wrote GOOGLE_API_KEY to $envPath" -ForegroundColor Green
 Write-Host "Reminder: do not commit .env to git. Use this file for local development only." -ForegroundColor Yellow

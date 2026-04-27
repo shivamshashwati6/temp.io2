@@ -13,8 +13,8 @@ load_dotenv()
 
 app = FastAPI(title="Local Weather App - Minimal")
 
-# Read OpenAI key from env; if present we'll use OpenAI for AI responses
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Read Google Gemini key from env; if present we'll use Gemini for AI responses
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # Allow CORS for local development so frontend served separately can call the API.
 app.add_middleware(
@@ -359,8 +359,8 @@ async def ai_query(req: AIQuery):
             weather = None
             hourly_data = None
 
-    # If OpenAI API key is available, use it for intelligent, natural responses
-    if OPENAI_API_KEY and weather:
+    # If Google API key is available, use it for intelligent, natural responses
+    if GOOGLE_API_KEY and weather:
         try:
             # Build comprehensive weather context
             context_parts = [
@@ -391,13 +391,10 @@ async def ai_query(req: AIQuery):
             context = "\n".join(context_parts)
             
             async with httpx.AsyncClient() as client:
-                headers = {"Authorization": f"Bearer {OPENAI_API_KEY}", "Content-Type": "application/json"}
-                body = {
-                    "model": "gpt-3.5-turbo",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": """You are a helpful, friendly weather assistant. Answer ANY weather-related question naturally and conversationally. 
+                headers = {"Content-Type": "application/json"}
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
+                
+                system_prompt = """You are a helpful, friendly weather assistant. Answer ANY weather-related question naturally and conversationally. 
 
 Provide:
 - Direct answers to the user's specific question
@@ -408,25 +405,27 @@ Provide:
 - Context about why the weather is the way it is
 
 Be conversational, helpful, and specific. Use the weather data provided. Keep responses under 200 words but be thorough."""
-                        },
-                        {
-                            "role": "user",
-                            "content": f"{context}\n\nUser question: {req.query}\n\nProvide a helpful, natural answer."
-                        }
-                    ],
-                    "max_tokens": 300,
-                    "temperature": 0.7,
+
+                body = {
+                    "contents": [{
+                        "parts": [{"text": f"System Guidelines:\n{system_prompt}\n\nWeather Data Context:\n{context}\n\nUser question: {req.query}\n\nProvide a helpful, natural answer."}]
+                    }],
+                    "generationConfig": {
+                        "temperature": 0.7,
+                        "maxOutputTokens": 300
+                    }
                 }
-                resp = await client.post("https://api.openai.com/v1/chat/completions", json=body, headers=headers, timeout=15.0)
+                
+                resp = await client.post(url, json=body, headers=headers, timeout=15.0)
                 resp.raise_for_status()
                 j = resp.json()
                 
-                if isinstance(j, dict) and j.get("choices"):
-                    answer = j["choices"][0].get("message", {}).get("content", "").strip()
+                if "candidates" in j and len(j["candidates"]) > 0:
+                    answer = j["candidates"][0].get("content", {}).get("parts", [{}])[0].get("text", "").strip()
                     if answer:
-                        return {"answer": answer, "mode": "openai", "provenance": ["openai", "open-meteo"]}
+                        return {"answer": answer, "mode": "gemini", "provenance": ["gemini", "open-meteo"]}
         except Exception as e:
-            print(f"OpenAI call failed: {e}")
+            print(f"Gemini call failed: {e}")
             # Fall through to rule-based
 
     # Enhanced rule-based responses - handle ANY weather question
