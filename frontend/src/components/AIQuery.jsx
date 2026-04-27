@@ -221,9 +221,8 @@ const AIQuery = ({ onAsk, response, loading, weatherData }) => {
                                             initial={{ opacity: 0, x: -20 }}
                                             animate={{ opacity: 1, x: 0 }}
                                             transition={{ delay: i * 0.1 }}
-                                            whileHover={{ scale: 1.03, x: 4 }}
-                                            whileTap={{ scale: 0.97 }}
                                             onClick={() => {
+                                                if (!weatherData) return;
                                                 setQuery(sug.text);
                                                 setTimeout(() => {
                                                     setChatHistory([{ role: 'user', type: 'text', text: sug.text }]);
@@ -240,7 +239,8 @@ const AIQuery = ({ onAsk, response, loading, weatherData }) => {
                                                 color: 'var(--text-secondary)',
                                                 fontSize: '0.9rem',
                                                 fontWeight: '500',
-                                                cursor: 'pointer',
+                                                cursor: weatherData ? 'pointer' : 'not-allowed',
+                                                opacity: weatherData ? 1 : 0.6,
                                                 transition: 'all var(--transition-base)',
                                                 display: 'flex',
                                                 alignItems: 'center',
@@ -248,10 +248,12 @@ const AIQuery = ({ onAsk, response, loading, weatherData }) => {
                                                 textAlign: 'left'
                                             }}
                                             onMouseEnter={(e) => {
+                                                if (!weatherData) return;
                                                 e.target.style.background = 'linear-gradient(135deg, rgba(192, 132, 252, 0.2), rgba(129, 140, 248, 0.2))';
                                                 e.target.style.borderColor = 'var(--color-accent-tertiary)';
                                             }}
                                             onMouseLeave={(e) => {
+                                                if (!weatherData) return;
                                                 e.target.style.background = 'linear-gradient(135deg, rgba(192, 132, 252, 0.1), rgba(129, 140, 248, 0.1))';
                                                 e.target.style.borderColor = 'rgba(192, 132, 252, 0.3)';
                                             }}
