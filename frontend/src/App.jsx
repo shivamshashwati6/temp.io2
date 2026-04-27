@@ -31,8 +31,9 @@ function App() {
     } catch (err) {
       console.error(err);
       // Show helpful connection error if server is down
+      const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
       const errorMessage = !err.response 
-        ? 'Backend server is offline. Please run start-backend.bat and try again.'
+        ? (isLocal ? 'Backend server is offline. Please run start-backend.bat.' : 'Unable to connect to the weather service. Please try again later.')
         : (err.response?.data?.detail || 'Failed to fetch weather data. Please check the location and try again.');
       setError(errorMessage);
     } finally {

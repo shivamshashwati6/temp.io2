@@ -25,13 +25,22 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Simple geocode cache persisted to disk to reduce external calls
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
-GEOCODE_CACHE_FILE = DATA_DIR / "geocode_cache.json"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+# Improved geocode cache handling for Vercel (read-only filesystem)
+try:
+    # Use /tmp on Vercel/Linux, or local data dir on Windows/Dev
+    if os.name == 'nt':
+        DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+    else:
+        DATA_DIR = Path("/tmp") / "weather_data"
+        
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    GEOCODE_CACHE_FILE = DATA_DIR / "geocode_cache.json"
+except Exception as e:
+    print(f"Warning: Could not create data directory: {e}")
+    GEOCODE_CACHE_FILE = None
 
 try:
-    if GEOCODE_CACHE_FILE.exists():
+    if GEOCODE_CACHE_FILE and GEOCODE_CACHE_FILE.exists():
         with GEOCODE_CACHE_FILE.open("r", encoding="utf-8") as f:
             GEOCODE_CACHE = json.load(f)
     else:
@@ -40,6 +49,8 @@ except Exception:
     GEOCODE_CACHE = {}
 
 def save_geocode_cache():
+    if not GEOCODE_CACHE_FILE:
+        return
     try:
         with GEOCODE_CACHE_FILE.open("w", encoding="utf-8") as f:
             json.dump(GEOCODE_CACHE, f, ensure_ascii=False, indent=2)
