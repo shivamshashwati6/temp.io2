@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Send, Bot, User, Loader, Zap, Brain, MessageCircle } from 'lucide-react';
+import WidgetRenderer from './widgets/WidgetRenderer';
 
 const AIQuery = ({ onAsk, response, loading, weatherData }) => {
     const [query, setQuery] = useState('');
@@ -9,7 +10,7 @@ const AIQuery = ({ onAsk, response, loading, weatherData }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (query.trim() && !loading) {
-            setChatHistory(prev => [...prev, { type: 'user', message: query }]);
+            setChatHistory(prev => [...prev, { role: 'user', type: 'text', text: query }]);
             onAsk(query);
             setQuery('');
         }
@@ -18,10 +19,30 @@ const AIQuery = ({ onAsk, response, loading, weatherData }) => {
     useEffect(() => {
         if (response && !loading) {
             setChatHistory(prev => {
-                if (prev.length > 0 && prev[prev.length - 1].type === 'ai' && prev[prev.length - 1].message === response) {
+                // Prevent duplicate responses if the prop hasn't changed but useEffect re-runs
+                const lastMsg = prev[prev.length - 1];
+                
+                let parsedResponse;
+                try {
+                    // Try to parse if it's a JSON string
+                    parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
+                } catch (e) {
+                    // Fallback to plain text if not valid JSON
+                    parsedResponse = { role: 'assistant', type: 'text', text: response };
+                }
+
+                // If parsedResponse is just a string (some LLMs might return a string even if we want JSON)
+                if (typeof parsedResponse === 'string') {
+                    parsedResponse = { role: 'assistant', type: 'text', text: parsedResponse };
+                }
+
+                // Deduplication check
+                if (lastMsg && lastMsg.role === 'assistant' && 
+                    (lastMsg.text === parsedResponse.text || JSON.stringify(lastMsg.data) === JSON.stringify(parsedResponse.data))) {
                     return prev;
                 }
-                return [...prev, { type: 'ai', message: response }];
+
+                return [...prev, parsedResponse];
             });
         }
     }, [response, loading]);
@@ -205,7 +226,7 @@ const AIQuery = ({ onAsk, response, loading, weatherData }) => {
                                             onClick={() => {
                                                 setQuery(sug.text);
                                                 setTimeout(() => {
-                                                    setChatHistory([{ type: 'user', message: sug.text }]);
+                                                    setChatHistory([{ role: 'user', type: 'text', text: sug.text }]);
                                                     onAsk(sug.text);
                                                 }, 100);
                                             }}
@@ -253,7 +274,7 @@ const AIQuery = ({ onAsk, response, loading, weatherData }) => {
                                     display: 'flex',
                                     gap: '12px',
                                     alignItems: 'flex-start',
-                                    flexDirection: chat.type === 'user' ? 'row-reverse' : 'row'
+                                    flexDirection: chat.role === 'user' ? 'row-reverse' : 'row'
                                 }}
                             >
                                 {/* Avatar */}
@@ -263,52 +284,70 @@ const AIQuery = ({ onAsk, response, loading, weatherData }) => {
                                         width: '40px',
                                         height: '40px',
                                         borderRadius: '12px',
-                                        background: chat.type === 'user'
+                                        background: chat.role === 'user'
                                             ? 'linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary))'
                                             : 'linear-gradient(135deg, var(--color-accent-tertiary), var(--color-accent-secondary))',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
                                         flexShrink: 0,
-                                        boxShadow: chat.type === 'user'
+                                        boxShadow: chat.role === 'user'
                                             ? '0 4px 12px rgba(56, 189, 248, 0.3)'
                                             : '0 4px 12px rgba(192, 132, 252, 0.3)'
                                     }}
                                 >
-                                    {chat.type === 'user' ? (
+                                    {chat.role === 'user' ? (
                                         <User size={22} color="#fff" strokeWidth={2.5} />
                                     ) : (
                                         <Bot size={22} color="#fff" strokeWidth={2.5} />
                                     )}
                                 </motion.div>
 
-                                {/* Message */}
-                                <motion.div
-                                    whileHover={{ scale: 1.01 }}
-                                    style={{
-                                        background: chat.type === 'user'
-                                            ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(56, 189, 248, 0.08))'
-                                            : 'linear-gradient(135deg, rgba(192, 132, 252, 0.15), rgba(192, 132, 252, 0.08))',
-                                        padding: '14px 18px',
-                                        borderRadius: '16px',
-                                        maxWidth: '75%',
-                                        border: `1px solid ${chat.type === 'user' ? 'rgba(56, 189, 248, 0.3)' : 'rgba(192, 132, 252, 0.3)'}`,
-                                        lineHeight: '1.6',
-                                        boxShadow: chat.type === 'user'
-                                            ? '0 2px 8px rgba(56, 189, 248, 0.1)'
-                                            : '0 2px 8px rgba(192, 132, 252, 0.1)'
-                                    }}
-                                >
-                                    <p style={{
-                                        margin: 0,
-                                        fontSize: '0.95rem',
-                                        whiteSpace: 'pre-wrap',
-                                        color: 'var(--text-primary)',
-                                        fontWeight: '500'
-                                    }}>
-                                        {chat.message}
-                                    </p>
-                                </motion.div>
+                                {/* Message Content */}
+                                <div style={{ 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    gap: '8px',
+                                    alignItems: chat.role === 'user' ? 'flex-end' : 'flex-start',
+                                    maxWidth: '85%'
+                                }}>
+                                    {/* Text Message */}
+                                    {(chat.text || chat.message) && (
+                                        <motion.div
+                                            whileHover={{ scale: 1.01 }}
+                                            style={{
+                                                background: chat.role === 'user'
+                                                    ? 'linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(56, 189, 248, 0.08))'
+                                                    : 'linear-gradient(135deg, rgba(192, 132, 252, 0.15), rgba(192, 132, 252, 0.08))',
+                                                padding: '14px 18px',
+                                                borderRadius: '16px',
+                                                border: `1px solid ${chat.role === 'user' ? 'rgba(56, 189, 248, 0.3)' : 'rgba(192, 132, 252, 0.3)'}`,
+                                                lineHeight: '1.6',
+                                                boxShadow: chat.role === 'user'
+                                                    ? '0 2px 8px rgba(56, 189, 248, 0.1)'
+                                                    : '0 2px 8px rgba(192, 132, 252, 0.1)'
+                                            }}
+                                        >
+                                            <p style={{
+                                                margin: 0,
+                                                fontSize: '0.95rem',
+                                                whiteSpace: 'pre-wrap',
+                                                color: 'var(--text-primary)',
+                                                fontWeight: '500'
+                                            }}>
+                                                {chat.text || chat.message}
+                                            </p>
+                                        </motion.div>
+                                    )}
+
+                                    {/* Widget Rendering */}
+                                    {chat.type === 'widget' && chat.widgetType && (
+                                        <WidgetRenderer 
+                                            widgetType={chat.widgetType} 
+                                            data={chat.data} 
+                                        />
+                                    )}
+                                </div>
                             </motion.div>
                         ))}
 

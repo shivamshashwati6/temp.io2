@@ -1,3 +1,13 @@
+@import "tailwindcss";
+
+@theme {
+  --color-accent-primary: var(--color-accent-primary);
+  --color-accent-secondary: var(--color-accent-secondary);
+  --color-accent-tertiary: var(--color-accent-tertiary);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-border: var(--glass-border);
+}
+
 :root {
   /* Typography */
   --font-heading: 'Outfit', sans-serif;
