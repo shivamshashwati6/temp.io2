@@ -23,7 +23,7 @@ function App() {
       if (district) params.district = district;
 
       // In production (Vercel), requests are relative. Locally, they use the Vite proxy.
-      const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+      const API_BASE_URL = '';
       const response = await axios.get(`${API_BASE_URL}/api/weather/by-region`, { params });
       setWeatherData(response.data);
       setCurrentLocation({ lat: response.data.latitude, lon: response.data.longitude });
@@ -49,7 +49,7 @@ function App() {
         payload.lon = currentLocation.lon;
       }
 
-      const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+      const API_BASE_URL = '';
       const response = await axios.post(`${API_BASE_URL}/api/ai/query`, payload);
       setAiResponse(response.data.answer);
     } catch (err) {

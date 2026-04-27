@@ -1,13 +1,26 @@
 {
   "version": 2,
-  "experimentalServices": {
-    "frontend": {
-      "entrypoint": "frontend",
-      "routePrefix": "/"
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     },
-    "backend": {
-      "entrypoint": "backend/main.py",
-      "routePrefix": "/api"
+    {
+      "src": "api/index.py",
+      "use": "@vercel/python"
     }
-  }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
