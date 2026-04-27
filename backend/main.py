@@ -389,14 +389,11 @@ async def ai_query(req: AIQuery):
                     context_parts.append(f"- Temperature range (next 12h): {min_temp:.1f}°C to {max_temp:.1f}°C")
             
             context = "\n".join(context_parts)
-            
             async with httpx.AsyncClient() as client:
                 headers = {"Content-Type": "application/json"}
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GOOGLE_API_KEY}"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GOOGLE_API_KEY}"
                 
-                system_prompt = """You are a helpful, friendly weather assistant. Answer ANY weather-related question naturally and conversationally. 
-
-Provide:
+                system_prompt = """You are a helpful, friendly weather assistant. Answer ANY weather-related question naturally and conversationally.
 - Direct answers to the user's specific question
 - Practical advice and recommendations when relevant
 - Safety tips for extreme conditions
