@@ -62,6 +62,10 @@ class AIQuery(BaseModel):
     lat: Optional[float] = None
     lon: Optional[float] = None
 
+@app.get("/")
+def root_health():
+    return {"status": "Backend Active", "timestamp": datetime.utcnow().isoformat()}
+
 @app.get("/health")
 def health():
     return {"ok": True, "time": datetime.utcnow().isoformat()}
