@@ -1,6 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { Wind } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const getAqiColor = (aqi) => {
     if (aqi <= 50) return '#10b981'; // Good (Green)
@@ -15,7 +15,6 @@ const AqiDialWidget = ({ data }) => {
     const { aqi, category } = data;
     const color = getAqiColor(aqi);
     
-    // Calculate rotation for the dial (0 to 180 degrees)
     // Assuming max AQI for scale is 500
     const percentage = Math.min(aqi / 500, 1);
 

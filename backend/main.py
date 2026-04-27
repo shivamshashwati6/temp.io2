@@ -611,46 +611,41 @@ Be conversational, helpful, and specific. Use the weather data provided. Keep re
         else:
             answer += "Low pressure - often associated with unsettled weather and possible precipitation."
     
-    # General/summary queries or unmatched questions
-    if not answer:
-        # Provide comprehensive summary for any other weather question
-        conditions = []
+    # Final response construction
+    if answer:
+        # Wrap the answer in a widget structure if possible
+        if any(keyword in q for keyword in rain_keywords + temp_keywords + wind_keywords):
+            widget_type = "CURRENT_WEATHER"
+            if any(keyword in q for keyword in rain_keywords):
+                widget_type = "TREND_GRAPH" # Show trend for rain/temp
+            
+            widget_data = {
+                "type": "widget",
+                "widgetType": widget_type,
+                "data": {
+                    "location": "Your Location",
+                    "temp": temp,
+                    "condition": "Cloudy" if cloud_cover > 50 else "Sunny",
+                    "humidity": humidity,
+                    "windSpeed": wind_speed,
+                    "aqi": 42, # Mock AQI for rule-based
+                    "category": "Good",
+                    "forecast": [
+                        {"day": "Mon", "temp": temp},
+                        {"day": "Tue", "temp": temp + 1},
+                        {"day": "Wed", "temp": temp - 1},
+                        {"day": "Thu", "temp": temp + 2},
+                        {"day": "Fri", "temp": temp},
+                        {"day": "Sat", "temp": temp - 1},
+                        {"day": "Sun", "temp": temp + 1},
+                    ]
+                },
+                "text": answer
+            }
+            return {"answer": json.dumps(widget_data), "mode": "rule-based", "provenance": ["open-meteo"]}
         
-        if temp > 30:
-            conditions.append(f"hot at {temp}°C")
-        elif temp > 20:
-            conditions.append(f"pleasant at {temp}°C")
-        elif temp < 15:
-            conditions.append(f"cool at {temp}°C")
-        else:
-            conditions.append(f"{temp}°C")
-        
-        if humidity > 70:
-            conditions.append(f"{humidity}% humidity (humid)")
-        if wind_speed > 20:
-            conditions.append(f"windy at {wind_speed} km/h")
-        if cloud_cover > 70:
-            conditions.append(f"{cloud_cover}% cloudy")
-        if will_rain:
-            conditions.append(f"{max_precip_prob}% chance of rain")
-        
-        condition_str = ", ".join(conditions) if conditions else "moderate conditions"
-        
-        answer = f"Current weather: {condition_str}. "
-        answer += f"Feels like {feels_like}°C. "
-        
-        if precipitation > 0:
-            answer += f"Currently raining ({precipitation}mm). "
-        elif will_rain:
-            answer += f"Rain possible in next 12 hours ({max_precip_prob}% chance). "
-        
-        if temp_trend == "rising":
-            answer += "Temperature is rising. "
-        elif temp_trend == "falling":
-            answer += "Temperature is falling. "
-        
-        answer += "\n\nFeel free to ask me specific questions about temperature, rain, wind, clothing, activities, or anything else weather-related!"
+        return {"answer": answer, "mode": "rule-based", "provenance": ["open-meteo"]}
     
-    return {"answer": answer, "mode": "rule-based", "provenance": ["open-meteo"]}
+    return {"answer": "I can help with weather questions. Try asking about temperature, rain, or what to wear!", "mode": "rule-based", "provenance": ["open-meteo"]}
 
 
