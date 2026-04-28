@@ -3,5 +3,4 @@ uvicorn
 httpx
 pydantic
 python-dotenv
-pathlib
 python-multipart
