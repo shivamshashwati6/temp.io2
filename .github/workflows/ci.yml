@@ -27,13 +27,23 @@ jobs:
     - name: Run server in background
       run: |
         cd api
-        nohup python -m uvicorn index:app --port 8000 &
-        sleep 5 # Wait for server to start
-    
+        python -m uvicorn index:app --port 8000 > server.log 2>&1 &
+        
+        # Wait for server to be ready
+        echo "Waiting for server to start..."
+        for i in {1..20}; do
+          if curl -s http://localhost:8000/api/health > /dev/null; then
+            echo "Server is up!"
+            break
+          fi
+          echo "Still waiting..."
+          sleep 2
+        done
+        
     - name: Run tests
       run: |
         cd api
-        python test_all.py
+        python test_all.py || (cat server.log && exit 1)
   
   test-frontend:
     runs-on: ubuntu-latest
